@@ -2,6 +2,14 @@ from operator import itemgetter
 from datetime import date
 hoy = date.strftime(date.today(), "%Y-%m-%d")
 
+def reiniciar_listas():
+    global productos
+    global ventas
+    global codigos
+    productos.clear()
+    ventas.clear()
+    codigos.clear()
+
 ventas = []
 productos = []
 codigos = []
@@ -46,21 +54,17 @@ pantalon_talle_m = {
 
 
 # 1. Registrar_producto: recibe un diccionario con codigo, nombre, categoria, precio y agrega un producto nuevo a la lista de productos. El stock del producto agregado debe estar inicialmente en cero.
-def suma(a,b):
-    return a+b
+
 
 def registrar_producto(nombre_producto):
     global productos
     global codigos
-    
-    
     if nombre_producto["codigo"] in codigos:
-        raise  ValueError("Producto ya registrado")
+        raise ValueError("Producto ya registrado")
     else:
         nombre_producto["stock"] = 0
         productos.append(nombre_producto)
         codigos.append(nombre_producto["codigo"])
-    
 
 
 
@@ -83,12 +87,14 @@ def recargar_stock(codigo,stock):
 # 3. hay_stock: recibe un código de producto y dice si hay stock (es decir, si el stock correspondiente es mayor a cero). Si el código indicado no existe en la lista de productos, debe devolver False.
 
 def hay_stock(codigo):
-    for producto in productos:
-        if producto["codigo"] == codigo and producto["stock"] > 0:
-            return "Hay stock de " + str(producto["stock"]) + " " + producto["nombre"]
-        elif producto["codigo"] == codigo and producto["stock"] <= 0 :
-            return "No hay stock de " + producto["nombre"]
-    return False
+    #if codigo in codigos:
+        for producto in productos:
+            if producto["codigo"] == codigo and producto["stock"] > 0:
+                return "Hay stock de " + str(producto["stock"]) + " " + producto["nombre"]
+            elif producto["codigo"] == codigo and producto["stock"] <= 0 :
+                return "No hay stock de " + producto["nombre"]
+    #else:    
+        return False
 
 
 
@@ -98,7 +104,7 @@ def hay_stock(codigo):
 # b. en caso contrario, es el valor original más un 21%
 
 def calcular_precio_final(producto, es_extranjero):
-    if es_extranjero and producto["precio"] > 70:
+    if producto["precio"] > 70 and es_extranjero:
         return producto["precio"]
     else:
         costo_final = producto["precio"] * 1.21
@@ -124,7 +130,7 @@ def realizar_compra(codigo_de_producto, cantidad_de_items_a_comprar):
     global ventas
     global productos
     for producto in productos:
-        if producto["codigo"] == codigo_de_producto:
+        if producto["codigo"] == codigo_de_producto and cantidad_de_items_a_comprar > 0:
             hay_stock_para_vender = producto["stock"] - cantidad_de_items_a_comprar
             if hay_stock_para_vender < 0:
                 raise ValueError('No hay stock suficiente para la venta')   
@@ -133,13 +139,11 @@ def realizar_compra(codigo_de_producto, cantidad_de_items_a_comprar):
                 venta = {
                 "codigo_producto": producto["codigo"],
                 "cantidad": cantidad_de_items_a_comprar,
-                "fecha": date.strftime(date.today(), "%Y-%m-%d"),
+                "fecha": hoy,
                 "precio_total": producto["precio"] * cantidad_de_items_a_comprar
                 }
                 ventas.append(venta)
-                return "Compra realizada, agregada a ventas"
-        # else:
-        #     return "Código incorrecto o cantidad de items no puede ser menor a 1"
+    return "Código incorrecto o cantidad de items no puede ser menor a 1"
 
 
 
@@ -152,7 +156,7 @@ def discontinuar_productos(dic_productos):
     for producto in dic_aux:
         if producto["stock"] == 0:
             dic_productos.remove(producto)
-    return dic_productos
+    #return dic_productos
 
 
 
@@ -160,8 +164,7 @@ def discontinuar_productos(dic_productos):
 #en el diccionario ventas, en el ejercicio 6, se cambio la clave precio por precio total, por eso en esta funcion ya no se multiplica por cantidad
 
 
-
-def valor_ventas_del_dia(hoy):
+def valor_ventas_del_dia():
     suma_ventas_del_dia = 0
     subtotal = 0
     for venta_de_hoy in ventas:
@@ -177,12 +180,12 @@ def valor_ventas_del_dia(hoy):
 # 9. ventas_del_anio: retorna un listado con todas las ventas para el año actual.
 
 def ventas_del_anio():
-    ventas_del_anio = []
-    anio=hoy[:4]
+    ventas_del_anio_actual = []
+    anio_actual = hoy[:4]
     for producto in ventas:
-        if producto["fecha"][:4] ==anio:
-            ventas_del_anio.append(producto)
-    return ventas_del_anio
+        if producto["fecha"][:4] == anio_actual:
+            ventas_del_anio_actual.append(producto)
+    return ventas_del_anio_actual
 
 
 
@@ -221,3 +224,7 @@ def actualizar_precios_por_categoria(categoria,porcentaje):
 # estara bien el raise acá, preguntar en clase            
     if count == len(productos):
         raise ValueError("Categoria no encontrada o mal escrita")
+
+
+
+
